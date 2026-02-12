@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebSearch",
-      "WebFetch(domain:docs.ollama.com)",
-      "Bash(dir:*)"
-    ]
-  }
-}
