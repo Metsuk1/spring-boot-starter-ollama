@@ -1,5 +1,6 @@
 package io.github.bayazit.ollama.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Role {
@@ -18,5 +19,15 @@ public enum Role {
     @JsonValue
     public String getValue() {
         return value;
+    }
+
+    @JsonCreator
+    public static Role fromValue(String value) {
+        for (Role role : values()) {
+            if (role.value.equals(value)) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("Unknown role: " + value);
     }
 }

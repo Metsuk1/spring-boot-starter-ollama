@@ -74,10 +74,8 @@ class OllamaAutoConfigurationTest {
         contextRunner
                 .withUserConfiguration(CustomRestClientConfig.class)
                 .run(context -> {
-                    // user-defined ollamaRestClient should take precedence
                     RestClient bean = (RestClient) context.getBean("ollamaRestClient");
                     assertThat(bean).isNotNull();
-                    // auto-config should not create its own
                     assertThat(context.getBeansOfType(RestClient.class)).hasSize(1);
                 });
     }

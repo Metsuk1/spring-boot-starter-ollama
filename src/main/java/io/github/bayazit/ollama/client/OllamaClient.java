@@ -17,9 +17,7 @@ public class OllamaClient {
     }
 
     public ChatResponse chat(ChatRequest request) {
-        if (request.getStream() == null) {
-            request.setStream(false);
-        }
+        request.setStream(request.getStream() != null ? request.getStream() : false);
         return restClient.post()
                 .uri("/api/chat")
                 .body(request)
@@ -28,9 +26,7 @@ public class OllamaClient {
     }
 
     public GenerateResponse generate(GenerateRequest request) {
-        if (request.getStream() == null) {
-            request.setStream(false);
-        }
+        request.setStream(request.getStream() != null ? request.getStream() : false);
         return restClient.post()
                 .uri("/api/generate")
                 .body(request)
@@ -53,7 +49,6 @@ public class OllamaClient {
                 .body(ModelList.class);
     }
 
-    @SuppressWarnings("unchecked")
     public ModelInfo showModel(String model) {
         return restClient.post()
                 .uri("/api/show")

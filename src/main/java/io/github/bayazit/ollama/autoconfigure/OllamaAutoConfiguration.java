@@ -7,9 +7,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+
+import java.time.Duration;
 
 @AutoConfiguration
 @EnableConfigurationProperties(OllamaProperties.class)
@@ -35,19 +40,27 @@ public class OllamaAutoConfiguration {
         return new OllamaClient(ollamaRestClient);
     }
 
-    @Bean
+    @Configuration
     @ConditionalOnClass(WebClient.class)
-    @ConditionalOnMissingBean(name = "ollamaWebClient")
-    public WebClient ollamaWebClient(OllamaProperties properties) {
-        return WebClient.builder()
-                .baseUrl(properties.getBaseUrl())
-                .build();
-    }
+    static class WebClientConfiguration {
 
-    @Bean
-    @ConditionalOnClass(WebClient.class)
-    @ConditionalOnMissingBean
-    public OllamaStreamingClient ollamaStreamingClient(WebClient ollamaWebClient) {
-        return new OllamaStreamingClient(ollamaWebClient);
+        @Bean
+        @ConditionalOnMissingBean(name = "ollamaWebClient")
+        public WebClient ollamaWebClient(OllamaProperties properties) {
+            Duration timeout = properties.getTimeout();
+            HttpClient httpClient = HttpClient.create()
+                    .responseTimeout(timeout);
+
+            return WebClient.builder()
+                    .baseUrl(properties.getBaseUrl())
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .build();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public OllamaStreamingClient ollamaStreamingClient(WebClient ollamaWebClient) {
+            return new OllamaStreamingClient(ollamaWebClient);
+        }
     }
 }
